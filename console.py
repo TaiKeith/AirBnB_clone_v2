@@ -113,18 +113,49 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
+    @classmethod
+    def verify_class(cls, line):
+        """Class methd to verify inputed class"""
+        if len(line) == 0:
+            print("** class name missing **")
+            return False
+        if line[0] not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return False
+        return True
+
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
+        line = args.split()
+        if not self.verify_class(line):
             return
-        elif args not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+
+        class_name = line[0]
+        kwargs = {}
+
+        for param in line[1:]:
+            try:
+                key, value = param.split("=")
+                if value[0] == '"' and value[-1] == '"':
+                    value = value[1:-1].replace('_', ' ')
+                elif '.' in value:
+                    value = float(value)
+                else:
+                    value = int(value)
+                kwargs[key] = value
+            except ValueError:
+                print(f"Skipping parameter {param}. Couldn't be identified")
+
+        try:
+            new_instance = HBNBCommand.classes[class_name]()
+            for key, value in kwargs.items():
+                setattr(new_instance, key, value)
+            storage.new(new_instance)
+            storage.save()
+            print(new_instance.id)
+        except Exception as e:
+            print(f"Error creating instance: {e}")
+        return
 
     def help_create(self):
         """ Help information for the create method """

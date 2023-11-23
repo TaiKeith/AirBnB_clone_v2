@@ -1,10 +1,19 @@
 #!/usr/bin/python3
 """ Place Module for HBNB project """
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from os import getenv
 import models
+
+
+place_amenity = Table("place_amenity", Base.metadata,
+                      Column('place_id', String(60),
+                             ForeignKey('places.id'),
+                             primary_key=True, nullable=False),
+                      Column('amenity_id', String(60),
+                             ForeignKey('amenities.id'),
+                             primary_key=True, nullable=False))
 
 
 class Place(BaseModel, Base):
@@ -39,6 +48,9 @@ class Place(BaseModel, Base):
     if getenv("HBNB_TYPE_STORAGE") == "db":
         reviews = relationship("Review", backref="place",
                 cascade="all, delete")
+        amenities = relationship("Amenity", secondary=place_amenity,
+                                 back_populates="place_amenities",
+                                 viewonly=False)
     else:
         @property
         def reviews(self):
@@ -49,3 +61,22 @@ class Place(BaseModel, Base):
                 if review.place_id == self.id:
                     reviews_list.append(review)
             return reviews_list
+
+        @property
+        def amenities(self):
+            """
+            Method that returns a list of amenity instances based on amenity_id
+            that contain amenity.id inked to Place
+            """
+            amenities_list = []
+            all_amenities = models.storage.all(Amenity)
+            for key, obj in all_amenities.items():
+                if key in self.amenity_ids:
+                    amenities_list.append(obj)
+            return amenities_list
+
+        @amenities.setter
+        def amenities(self, obj):
+            """Setter method for amenity_ids"""
+            if isinstance(obj, Amenity):
+                self.amenity_ids.append(obj.id)

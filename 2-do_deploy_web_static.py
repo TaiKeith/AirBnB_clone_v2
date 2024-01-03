@@ -14,19 +14,19 @@ env.user = "ubuntu"
 env.key_filename = '~/.ssh/id_rsa'
 
 
-def do_deploy(archive_name):
+def do_deploy(archive_path):
     """
     This function distributes an archive to my web servers
     """
-    if not os.path.exists(archive_name):
+    if not os.path.exists(archive_path):
         return False
 
     try:
         # Upload the archive to /tmp/ directory of the web server
-        put(archive_name, '/tmp/')
+        put(archive_path, '/tmp/')
 
         # Extract the archive to /data/web_static/releases/<archive filename>
-        archive_filename = os.path.basename(archive_name)
+        archive_filename = os.path.basename(archive_path)
         folder_name = os.path.splitext(archive_filename)[0]
         release_path = os.path.join('/data/web_static/releases', folder_name)
 

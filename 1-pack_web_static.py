@@ -19,12 +19,12 @@ def do_pack():
         local("mkdir -p versions")
 
         # Set the archive name
-        archive_name = "web_static_{}.tgz".format(timestamp)
+        archive_path = "web_static_{}.tgz".format(timestamp)
 
         # Compress the contents of the web_static folder
-        local("tar -cvzf versions/{} web_static".format(archive_name))
+        local("tar -cvzf versions/{} web_static".format(archive_path))
 
-        return "versions/{}".format(archive_name)
+        return "versions/{}".format(archive_path)
 
     except Exception as e:
         return None

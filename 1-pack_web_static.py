@@ -1,10 +1,15 @@
 #!/usr/bin/python3
+"""
+This module contains a function that creates a .tgz archive from the
+web_static folder
+"""
+
 from fabric.api import local
 from datetime import datetime
 
 
 def do_pack():
-    """ 
+    """
     A function that generates archive from the contents of web_static folder
     """
 

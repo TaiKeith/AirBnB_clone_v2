@@ -9,9 +9,9 @@ from datetime import datetime
 import os
 
 
-env.hosts = ['54.227.221.46', '52.86.160.210']
+env.hosts = ['100.26.253.187', '54.210.161.190']
 env.user = "ubuntu"
-env.key_filename = '~/.ssh/id_rsa'
+env.key_filename = '~/.ssh/school'
 
 
 def do_pack():

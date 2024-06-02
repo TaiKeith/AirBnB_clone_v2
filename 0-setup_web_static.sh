@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# This script sets up my web servers for the deployment of web_static
+# sets up my web servers for the deployment of web_static
+
+# Install Nginx if not already installed
 sudo apt-get update
 sudo apt-get install -y nginx
 
+# Create folders if not already exists
 sudo mkdir -p /data/web_static/shared/
 sudo mkdir -p /data/web_static/releases/test/
 
+# Create a fake HTML file for testing
 echo "<html>
   <head>
   </head>
@@ -14,11 +18,14 @@ echo "<html>
   </body>
 </html>" >> /data/web_static/releases/test/index.html
 
+# Create & recreate a symbolic link
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 
-# Give ownership of /data/ folder to ubuntu user and group
+# Give ownership to ubuntu user and group
 sudo chown -R ubuntu:ubuntu /data/
 
-sudo sed -i '/server {/a \\n    location /hbnb_static {\n\talias /data/web_static/current/;\n    }\n' /etc/nginx/sites-available/default
+# update Nginx config to serve /data/web_static/current at /hbnb_static/
+sudo sed -i "26i \\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n" /etc/nginx/sites-available/default
 
-service nginx restart
+# Restart Nginx to apply changes
+sudo service nginx restart

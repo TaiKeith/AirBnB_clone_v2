@@ -15,66 +15,43 @@ env.key_filename = '~/.ssh/school'
 
 
 def do_pack():
-    """
-    A function that generates archive from the contents of web_static folder
-    """
+    """Create a tar gzipped archive of the directory web_static."""
+    # obtain the current date and time
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    try:
-        # Create the versions' folder if it doesn't exist
-        local("mkdir -p versions")
+    # Construct path where archive will be saved
+    archive_path = "versions/web_static_{}.tgz".format(now)
 
-        # Set the archive name
-        archive_path = "web_static_{}.tgz".format(timestamp)
+    # use fabric function to create directory if it doesn't exist
+    local("mkdir -p versions")
 
-        # Compress the contents of the web_static folder
-        local("tar -cvzf versions/{} web_static".format(archive_path))
+    # Use tar command to create a compresses archive
+    archived = local("tar -cvzf {} web_static".format(archive_path))
 
-        return "versions/{}".format(archive_path)
-
-    except Exception as e:
+    # Check archive Creation Status
+    if archived.return_code != 0:
         return None
+    else:
+        return archive_path
 
 
 def do_deploy(archive_path):
     """
-    This function distributes an archive to my web servers.
+    This function distributes an archive to my web servers
     """
-    if not os.path.exists(archive_path):
-        return False
+    if os.path.exists(archive_path):
+        archive = archive_path.split('/')[1]
+        a_path = "/tmp/{}".format(archive)
+        folder = archive.split('.')[0]
+        f_path = "/data/web_static/releases/{}/".format(folder)
 
-    try:
-        # Extract the archive filename
-        archive = archive_path.split('/')[-1]
-        archive_filename = "/tmp/{}".format(archive)
-        folder_name = archive.split('.')[0]
-        release_path = "/data/web_static/releases/{}/".format(folder_name)
-
-        # Upload the archive to the /tmp/ directory on the web server
-        put(archive_path, archive_filename)
-
-        # Create the release directory
-        run('mkdir -p {}'.format(release_path))
-
-        # Extract the archive to the release directory
-        run('tar -xzf {} -C {}'.format(archive_filename, release_path))
-
-        # Remove the archive from the web server
-        run('rm {}'.format(archive_filename))
-
-        # Move the contents out of the web_static folder
-        run('mv {}/web_static/* {}'.format(release_path, release_path))
-        run('rm -rf {}/web_static'.format(release_path))
-
-        # Remove the existing symbolic link
-        run('rm -rf /data/web_static/current')
-
-        # Create a new symbolic link
-        run('ln -s {} /data/web_static/current'.format(release_path))
-
-        print("New version deployed!")
+        put(archive_path, a_path)
+        run("mkdir -p {}".format(f_path))
+        run("tar -xzf {} -C {}".format(a_path, f_path))
+        run("rm {}".format(a_path))
+        run("mv -f {}web_static/* {}".format(f_path, f_path))
+        run("rm -rf {}web_static".format(f_path))
+        run("rm -rf /data/web_static/current")
+        run("ln -s {} /data/web_static/current".format(f_path))
         return True
-
-    except Exception as e:
-        print(f"Deployment failed: {e}")
-        return False
+    return False

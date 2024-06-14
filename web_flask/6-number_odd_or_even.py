@@ -1,0 +1,65 @@
+#!/usr/bin/python3
+"""Start Flask web application"""
+
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+
+@app.route('/', strict_slashes=False)
+def hello_hbnb():
+    """
+    Routing to root, strict_slashes ensure
+    the URL works whether it ends with or without the /
+    """
+    return "Hello HBNB!"
+
+
+@app.route('/hbnb', strict_slashes=False)
+def hbnb():
+    """
+    Routing to /hbnb, strict_slashes ensure
+    the URL works whether it ends with or without the /
+    """
+    return "HBNB"
+
+
+@app.route('/c/<text>', strict_slashes=False)
+def c_is_fun(text):
+    """Routing to /c/ using variables"""
+    text = text.replace('_', ' ')
+    return "C {}".format(text)
+
+
+@app.route('/python/', defaults={'text': 'is_cool'}, strict_slashes=False)
+@app.route('/python/<text>', strict_slashes=False)
+def python_is_cool(text):
+    """Routing to /python/ using variables"""
+    text = text.replace('_', ' ')
+    return "python {}".format(text)
+
+
+@app.route('/number/<int:n>', strict_slashes=False)
+def is_a_number(n):
+    """Routing to n for integers only"""
+    return "{} is a number".format(n)
+
+
+@app.route('/number_template/<int:n>', strict_slashes=False)
+def is_a_number_template(n=None):
+    """Routing to /number_template/ for integers only,
+    rendering a HTML page
+    """
+    return render_template('5-number.html', n=n)
+
+
+@app.route('/number_odd_or_even/<int:n>', strict_slashes=False)
+def odd_or_even_template(n=None):
+    """Routing to /number_odd_or_even/ which renders a
+    HTML page for odd or even integers only
+    """
+    return render_template('6-number_odd_or_even.html', n=n)
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)

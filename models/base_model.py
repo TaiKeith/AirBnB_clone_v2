@@ -11,25 +11,22 @@ Base = declarative_base()
 
 class BaseModel:
     """A base class for all hbnb models"""
-    id = Column(String(60), nullable=False, primary_key=True,
-            default=lambda: str(uuid.uuid4()))
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+    id = Column(String(60), nullable=False, primary_key=True)
+    created_at = Column(DateTime, nullable=False,
+                        default=datetime.utcnow())
+    updated_at = Column(DateTime, nullable=False,
+                        default=datetime.utcnow())
 
     def __init__(self, *args, **kwargs):
         """Instatntiates a new model"""
+        self.id = str(uuid.uuid4())
+        self.created_at = self.updated_at = datetime.utcnow()
         if kwargs:
             for key, value in kwargs.items():
+                if key == 'created_at' or key == 'updated_at':
+                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
                 if key != "__class__":
-                    if key in ["created_at", "updated_at"]:
-                        setattr(self, key, datetime.strptime(value,
-                            "%Y-%m-%dT%H:%M:%S.%f"))
-                    else:
-                        setattr(self, key, value)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = self.created_at
+                    setattr(self, key, value)
 
     def __str__(self):
         """Returns a string representation of the instance"""
@@ -38,9 +35,10 @@ class BaseModel:
 
     def save(self):
         """Updates updated_at with current time when instance is changed"""
+        from models import storage
         self.updated_at = datetime.now()
-        models.storage.new(self)
-        models.storage.save()
+        storage.new(self)
+        storage.save()
 
     def to_dict(self):
         """Convert instance into dict format"""
@@ -55,5 +53,6 @@ class BaseModel:
         return dictionary
 
     def delete(self):
-        """Deletes the current instance from the storage"""
-        models.storage.delete(self)
+        """delete the current instance from the storage"""
+        from models import storage
+        storage.delete(self)

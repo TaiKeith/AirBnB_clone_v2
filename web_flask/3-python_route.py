@@ -36,7 +36,7 @@ def c_is_fun(text):
 def python_is_fun(text):
     """Routing to /python/ using variables"""
     text = text.replace('_', ' ')
-    return "python {}".format(text)
+    return "Python {}".format(text)
 
 
 if __name__ == "__main__":
